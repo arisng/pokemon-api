@@ -1,1 +1,2 @@
-const POKEMONS_LENGTH = 721;
+const DATA_SIZE = 721;
+module.exports = DATA_SIZE;

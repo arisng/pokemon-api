@@ -1,5 +1,6 @@
 const fs = require("fs");
 const csv = require("csvtojson");
+const DATA_SIZE = require("./config");
 
 const createPokemonData = async () => {
   let newData = await csv().fromFile("pokemon.csv");
@@ -10,7 +11,7 @@ const createPokemonData = async () => {
     data = { data: [] };
   }
 
-  newData = Array.from(newData).slice(0, 721);
+  newData = Array.from(newData).slice(0, DATA_SIZE);
 
   newData = newData.map((e, index) => {
     return {

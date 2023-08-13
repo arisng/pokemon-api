@@ -2,6 +2,7 @@ const crypto = require("crypto");
 const fs = require("fs");
 const express = require("express");
 const router = express.Router();
+const DATA_SIZE = require("../config");
 
 /* GET pokemons listing. */
 router.get("/", (req, res, next) => {
@@ -68,11 +69,8 @@ router.get("/:pokemonID", (req, res, next) => {
     let db = fs.readFileSync("db.json", "utf-8");
     db = JSON.parse(db);
     const pokemons = db.data;
-    //find book by id
-    // const targetIndex = pokemons.findIndex(
-    //   (pokemon) => pokemon.id === pokemonId
-    // );
-    if (pokemonId <= 0 || pokemonId > 721) {
+
+    if (pokemonId <= 0 || DATA_SIZE > 721) {
       const exception = new Error(`pokemon not found`);
       exception.statusCode = 404;
       throw exception;
@@ -84,9 +82,9 @@ router.get("/:pokemonID", (req, res, next) => {
     let prevPokemonId = 0;
     let nextPokemonId = 0;
     if (pokemonId == 1) {
-      prevPokemonId = 721;
+      prevPokemonId = DATA_SIZE;
       nextPokemonId = pokemonId + 1;
-    } else if (pokemonId == 721) {
+    } else if (pokemonId == DATA_SIZE) {
       prevPokemonId = pokemonId - 1;
       nextPokemonId = 1;
     } else {
