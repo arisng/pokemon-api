@@ -58,4 +58,53 @@ router.get("/", (req, res, next) => {
   }
 });
 
+/* GET pokemon by Id. */
+router.get("/:pokemonID", (req, res, next) => {
+  try {
+    const { pokemonID } = req.params;
+    let pokemonId = parseInt(pokemonID);
+
+    //Read data from db.json then parse to JSobject
+    let db = fs.readFileSync("db.json", "utf-8");
+    db = JSON.parse(db);
+    const pokemons = db.data;
+    //find book by id
+    // const targetIndex = pokemons.findIndex(
+    //   (pokemon) => pokemon.id === pokemonId
+    // );
+    if (pokemonId <= 0 || pokemonId > 721) {
+      const exception = new Error(`pokemon not found`);
+      exception.statusCode = 404;
+      throw exception;
+    }
+    console.log("getPokemonbyId");
+    console.log("input: ", pokemonId);
+
+    let result = [];
+    let prevPokemonId = 0;
+    let nextPokemonId = 0;
+    if (pokemonId == 1) {
+      prevPokemonId = 721;
+      nextPokemonId = pokemonId + 1;
+    } else if (pokemonId == 721) {
+      prevPokemonId = pokemonId - 1;
+      nextPokemonId = 1;
+    } else {
+      prevPokemonId = pokemonId - 1;
+      nextPokemonId = pokemonId + 1;
+    }
+    console.log("cur: ", pokemonId);
+    console.log("cur: ", prevPokemonId);
+    console.log("cur: ", nextPokemonId);
+
+    result.push(pokemons.filter((pokemon) => pokemon.id === pokemonId));
+    result.push(pokemons.filter((pokemon) => pokemon.id === prevPokemonId));
+    result.push(pokemons.filter((pokemon) => pokemon.id === nextPokemonId));
+    //put send response
+    res.status(200).send(result);
+  } catch (error) {
+    next(error);
+  }
+});
+
 module.exports = router;

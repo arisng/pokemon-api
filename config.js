@@ -1,0 +1,1 @@
+const POKEMONS_LENGTH = 721;
