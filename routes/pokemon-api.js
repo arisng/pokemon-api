@@ -55,37 +55,18 @@ router.get("/", (req, res, next) => {
     //Read data from db.json then parse to JSonbject
     let db = fs.readFileSync("db.json", "utf-8");
     db = JSON.parse(db);
-    const pokemons = db.data;
+    // const pokemons = db.data;
+    const { data } = db;
+
+    // const { pokemons } = db;
     //Filter data by title
-    let result = pokemons;
+    // let result = pokemons;
 
-    /*
-    if (type) {
-      result = result.filter((pokemon) =>
-        pokemon.types.some(
-          (pokemonType) => pokemonType.toLowerCase() === type.toLowerCase()
-        )
-      );
-    }
-
-    if (search) {
-      const searchRegex = new RegExp(name, "i");
-      result = result.filter((pokemon) => searchRegex.test(pokemon.name));
-    }
-    // addition filter
-    if (filterKeys.length) {
-      filterKeys.forEach((condition) => {
-        result = result.filter(
-          (pokemon) => pokemon[condition] === filterQuery[condition]
-        );
-      });
-    }
-    */
     if (filterKeys.length) {
       if (filterQuery.type) {
         const searchQuery = filterQuery.type.toLowerCase();
         console.log("Line 87 searchQuery", searchQuery);
-        result = result.filter((pokemon) =>
+        result = data.filter((pokemon) =>
           pokemon.types.some(
             (pokemonType) => pokemonType.toLowerCase() === searchQuery
           )
@@ -95,18 +76,21 @@ router.get("/", (req, res, next) => {
       if (filterQuery.search) {
         const searchQuery = filterQuery.search.toLowerCase();
         console.log(" Line  95 searchQuery", searchQuery);
-        result = result.filter(
+        result = data.filter(
           (pokemon) => pokemon.name === searchQuery || pokemon.id == searchQuery
         );
       }
+    } else {
+      result = data;
     }
 
     //then select number of result by offset
     result = result.slice(offset, offset + limit);
+    const newdb = { data: result };
 
     //send response
 
-    res.send(result);
+    res.send(newdb);
   } catch (error) {
     next(error);
   }

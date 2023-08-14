@@ -17,9 +17,27 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+  })
+);
+
+app.use((req, res, next) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+  res.setHeader("Access-Control-Max-Age", "1800");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  res.setHeader("Access-Control-Allow-Headers", "Authorization");
+  res.setHeader("Access-Control-Allow-Headers", "Origin");
+  res.setHeader("Access-Control-Allow-Headers", "X-Auth-Token");
+  next();
+});
+
 app.use("/", indexRouter);
 // app.use('/users', usersRouter);
-app.use(cors());
+
 //catch when when request match no route
 app.use((req, res, next) => {
   const exception = new Error(`Path not found`);
@@ -32,8 +50,22 @@ app.use((err, req, res, next) => {
   res.status(err.statusCode).send(err.message);
 });
 
-// app.listen(9000, function () {
-//   console.log("CORS-enabled web server listening on port 9000");
+// const corsOptions = {
+//   origin: "http://localhost:3000",
+//   credentials: true, //access-control-allow-credentials:true
+//   optionSuccessStatus: 200,
+// };
+
+// app.get("/pokemons", function (req, res, next) {
+//   res.json({ msg: "This is CORS-enabled for all origins!" });
 // });
+
+// Rest of your server configuration and routes
+
+// app.listen(9001, () => {
+//   console.log("Server is running on port 9001");
+// });
+
+// app.listen(9000);
 
 module.exports = app;
