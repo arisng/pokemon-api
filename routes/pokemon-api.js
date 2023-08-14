@@ -209,4 +209,40 @@ router.post("/", (req, res, next) => {
   }
 });
 
+/* DELETE new Pokemon. */
+router.delete("/:pokemonID", (req, res, next) => {
+  try {
+    const { pokemonID } = req.params;
+    console.log("pokemonID: ", pokemonID);
+    let pokemonId = parseInt(pokemonID);
+
+    //Read data from db.json then parse to JSobject
+    let db = fs.readFileSync("db.json", "utf-8");
+    db = JSON.parse(db);
+    const pokemons = db.data;
+    const size = pokemons.length;
+    console.log("size: ", size);
+    const targetIndex = pokemons.findIndex(
+      (pokemon) => pokemon.id === pokemonId
+    );
+    console.log("targetId: ", targetIndex);
+
+    if (targetIndex < 0 || targetIndex >= size) {
+      const exception = new Error(`pokemon not found`);
+      exception.statusCode = 404;
+      throw exception;
+    }
+    // console.log("pokemons: ", pokemons);
+    db.data = pokemons.filter((pokemon) => pokemon.id != pokemonId);
+    console.log("pokemons after: ", db.data);
+    db = JSON.stringify(db);
+    // console.log("size: ", pokemons.size);
+    fs.writeFileSync("db.json", db);
+    //put send response
+    res.status(200).send({});
+  } catch (error) {
+    next(error);
+  }
+});
+
 module.exports = router;
