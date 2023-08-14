@@ -98,14 +98,21 @@ router.get("/", (req, res, next) => {
 router.get("/:pokemonID", (req, res, next) => {
   try {
     const { pokemonID } = req.params;
+    console.log("pokemonID: ", pokemonID);
     let pokemonId = parseInt(pokemonID);
 
     //Read data from db.json then parse to JSobject
     let db = fs.readFileSync("db.json", "utf-8");
     db = JSON.parse(db);
     const pokemons = db.data;
+    const size = pokemons.length;
+    console.log("size: ", size);
+    const targetIndex = pokemons.findIndex(
+      (pokemon) => pokemon.id === pokemonId
+    );
+    console.log("targetId: ", targetIndex);
 
-    if (pokemonId <= 0 || DATA_SIZE > 721) {
+    if (targetIndex < 0 || targetIndex >= size) {
       const exception = new Error(`pokemon not found`);
       exception.statusCode = 404;
       throw exception;
@@ -114,25 +121,25 @@ router.get("/:pokemonID", (req, res, next) => {
     // console.log("input: ", pokemonId);
 
     let result = [];
-    let prevPokemonId = 0;
-    let nextPokemonId = 0;
-    if (pokemonId == 1) {
-      prevPokemonId = DATA_SIZE;
-      nextPokemonId = pokemonId + 1;
-    } else if (pokemonId == DATA_SIZE) {
-      prevPokemonId = pokemonId - 1;
-      nextPokemonId = 1;
+    let prevId = 0;
+    let nextId = 0;
+    if (targetIndex == 0) {
+      prevId = size - 1;
+      nextId = targetIndex + 1;
+    } else if (targetIndex == size - 1) {
+      prevId = targetIndex - 1;
+      nextId = 0;
     } else {
-      prevPokemonId = pokemonId - 1;
-      nextPokemonId = pokemonId + 1;
+      prevId = targetIndex - 1;
+      nextId = targetIndex + 1;
     }
-    // console.log("cur: ", pokemonId);
-    // console.log("cur: ", prevPokemonId);
-    // console.log("cur: ", nextPokemonId);
+    console.log("cur: ", targetIndex);
+    console.log("cur: ", prevId);
+    console.log("cur: ", nextId);
 
-    result.push(pokemons.filter((pokemon) => pokemon.id === pokemonId));
-    result.push(pokemons.filter((pokemon) => pokemon.id === prevPokemonId));
-    result.push(pokemons.filter((pokemon) => pokemon.id === nextPokemonId));
+    result.push(pokemons[targetIndex]);
+    result.push(pokemons[prevId]);
+    result.push(pokemons[nextId]);
     //put send response
     res.status(200).send(result);
   } catch (error) {
@@ -146,9 +153,6 @@ router.post("/", (req, res, next) => {
   let db = fs.readFileSync("db.json", "utf-8");
   db = JSON.parse(db);
   const pokemons = db.data;
-  // console.log("test post;");
-  // const { name, types, imageLink } = req.body;
-  // console.log("test post 2;");
 
   const newPok = createPokemon();
   console.log("newPok: ", newPok);
@@ -181,15 +185,13 @@ router.post("/", (req, res, next) => {
       exception.statusCode = 404;
       throw exception;
     }
-    // const min = 720;
-    // const max = 800;
-    // console.log("test post 2;");
-    const newPokemon = {
-      id,
-      name,
-      types,
-      imageLink,
-    };
+
+    // const newPokemon = {
+    //   id,
+    //   name,
+    //   types,
+    //   imageLink,
+    // };
 
     //Add new book to book JS object
     pokemons.push(newPok);
@@ -201,7 +203,7 @@ router.post("/", (req, res, next) => {
     fs.writeFileSync("db.json", db);
 
     //post send response
-    res.status(200).send(newPokemon);
+    res.status(200).send(newPok);
   } catch (error) {
     next(error);
   }
