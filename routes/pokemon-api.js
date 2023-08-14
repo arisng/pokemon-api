@@ -9,24 +9,17 @@ const { faker } = require("@faker-js/faker");
 const createPokemon = () => {
   const min = 720;
   const max = 800;
-  // console.log("test createPok");
-  const name = faker.person.firstName();
-  // console.log("test createPok with name: ", name);
-  const typeLength = Math.floor(Math.random() * 4);
-  // console.log("test createPok with typeLength: ", typeLength);
-  const allTypes = pokemonAllTypes();
-  // console.log("test createPok with allTypes: ", allTypes);
-  // // Shuffle the 'types' array randomly
-  const shuffledTypes = allTypes.sort(() => 0.5 - Math.random());
-  // console.log("test createPok with shuffledTypes: ", shuffledTypes);
 
+  const name = faker.person.firstName();
+  const typeLength = Math.floor(Math.random() * 4);
+  const allTypes = pokemonAllTypes();
+  // Shuffle the 'types' array randomly
+  const shuffledTypes = allTypes.sort(() => 0.5 - Math.random());
   // Extract a subarray with the desired length
   const types = shuffledTypes.slice(0, typeLength);
-  // console.log("test createPok with types: ", types);
   const randomId = Math.floor(Math.random() * DATA_SIZE) + 1;
   const imageLink = `http://localhost:9000/images/${randomId}.jpg`;
   const id = Math.floor(Math.random() * (max - min + 1)) + min;
-  // console.log("test createPok with id: ", id);
   const newPokemon = {
     id,
     name,
@@ -98,7 +91,7 @@ router.get("/", (req, res, next) => {
 router.get("/:pokemonID", (req, res, next) => {
   try {
     const { pokemonID } = req.params;
-    console.log("pokemonID: ", pokemonID);
+
     let pokemonId = parseInt(pokemonID);
 
     //Read data from db.json then parse to JSobject
@@ -106,19 +99,16 @@ router.get("/:pokemonID", (req, res, next) => {
     db = JSON.parse(db);
     const pokemons = db.data;
     const size = pokemons.length;
-    console.log("size: ", size);
+
     const targetIndex = pokemons.findIndex(
       (pokemon) => pokemon.id === pokemonId
     );
-    console.log("targetId: ", targetIndex);
 
     if (targetIndex < 0 || targetIndex >= size) {
       const exception = new Error(`pokemon not found`);
       exception.statusCode = 404;
       throw exception;
     }
-    // console.log("getPokemonbyId");
-    // console.log("input: ", pokemonId);
 
     let result = [];
     let prevId = 0;
@@ -133,9 +123,6 @@ router.get("/:pokemonID", (req, res, next) => {
       prevId = targetIndex - 1;
       nextId = targetIndex + 1;
     }
-    console.log("cur: ", targetIndex);
-    console.log("cur: ", prevId);
-    console.log("cur: ", nextId);
 
     result.push(pokemons[targetIndex]);
     result.push(pokemons[prevId]);
@@ -160,21 +147,18 @@ router.post("/", (req, res, next) => {
 
   try {
     if (!name) {
-      // console.log("test post name;");
       const exception = new Error(`Missing required data `);
       exception.statusCode = 404;
       throw exception;
     }
 
     if (types.length < 1 || types.length > 2) {
-      // console.log("test post types;");
       const exception = new Error(`Pokémon can only have one or two types. `);
       exception.statusCode = 404;
       throw exception;
     }
 
     if (pokemons.some((pokemon) => pokemon.name === name)) {
-      // console.log("test post name;");
       const exception = new Error(`The Pokémon already exists. `);
       exception.statusCode = 404;
       throw exception;
@@ -185,13 +169,6 @@ router.post("/", (req, res, next) => {
       exception.statusCode = 404;
       throw exception;
     }
-
-    // const newPokemon = {
-    //   id,
-    //   name,
-    //   types,
-    //   imageLink,
-    // };
 
     //Add new book to book JS object
     pokemons.push(newPok);
@@ -213,33 +190,100 @@ router.post("/", (req, res, next) => {
 router.delete("/:pokemonID", (req, res, next) => {
   try {
     const { pokemonID } = req.params;
-    console.log("pokemonID: ", pokemonID);
     let pokemonId = parseInt(pokemonID);
-
     //Read data from db.json then parse to JSobject
     let db = fs.readFileSync("db.json", "utf-8");
     db = JSON.parse(db);
     const pokemons = db.data;
     const size = pokemons.length;
-    console.log("size: ", size);
     const targetIndex = pokemons.findIndex(
       (pokemon) => pokemon.id === pokemonId
     );
-    console.log("targetId: ", targetIndex);
-
     if (targetIndex < 0 || targetIndex >= size) {
       const exception = new Error(`pokemon not found`);
       exception.statusCode = 404;
       throw exception;
     }
-    // console.log("pokemons: ", pokemons);
     db.data = pokemons.filter((pokemon) => pokemon.id != pokemonId);
-    console.log("pokemons after: ", db.data);
     db = JSON.stringify(db);
-    // console.log("size: ", pokemons.size);
     fs.writeFileSync("db.json", db);
-    //put send response
     res.status(200).send({});
+  } catch (error) {
+    next(error);
+  }
+});
+
+/* UPDATE a Pokemon. */
+router.put("/:pokemonID", (req, res, next) => {
+  try {
+    // verify the id
+    const { pokemonID } = req.params;
+    let pokemonId = parseInt(pokemonID);
+
+    let db = fs.readFileSync("db.json", "utf-8");
+    db = JSON.parse(db);
+    const pokemons = db.data;
+    const size = pokemons.length;
+    const targetIndex = pokemons.findIndex(
+      (pokemon) => pokemon.id === pokemonId
+    );
+    if (targetIndex < 0 || targetIndex >= size) {
+      const exception = new Error(`pokemon not found`);
+      exception.statusCode = 404;
+      throw exception;
+    }
+
+    const allowUpdate = ["name", "types", "imageLink"];
+    const updates = req.body;
+
+    const updateKeys = Object.keys(updates);
+
+    //find update request that not allow
+    const notAllow = updateKeys.filter((el) => !allowUpdate.includes(el));
+
+    if (notAllow.length) {
+      const exception = new Error(`Update field not allow`);
+      exception.statusCode = 401;
+      throw exception;
+    }
+
+    if (!updates.name) {
+      const exception = new Error(`Missing required data `);
+      exception.statusCode = 404;
+      throw exception;
+    }
+
+    if (updates.types.length < 1 || updates.types.length > 2) {
+      const exception = new Error(`Pokémon can only have one or two types. `);
+      exception.statusCode = 404;
+      throw exception;
+    }
+
+    if (pokemons.some((pokemon) => pokemon.name === updates.name)) {
+      const exception = new Error(`The Pokémon already exists. `);
+      exception.statusCode = 404;
+      throw exception;
+    }
+
+    const allTypes = pokemonAllTypes();
+
+    if (updates.types.some((type) => !allTypes.includes(type))) {
+      console.log("test types");
+      const exception = new Error(`Pokémon's type is invalid.`);
+      exception.statusCode = 404;
+      throw exception;
+    }
+
+    const updatedPokemons = { ...db.data[targetIndex], ...updates };
+
+    db.data[targetIndex] = updatedPokemons;
+    //db JSobject to JSON string
+    db = JSON.stringify(db);
+    //write and save to db.json
+    fs.writeFileSync("db.json", db);
+
+    //post send response
+    res.status(200).send(updatedPokemons);
   } catch (error) {
     next(error);
   }
