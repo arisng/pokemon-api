@@ -32,4 +32,8 @@ app.use((err, req, res, next) => {
   res.status(err.statusCode).send(err.message);
 });
 
+// app.listen(9000, function () {
+//   console.log("CORS-enabled web server listening on port 9000");
+// });
+
 module.exports = app;

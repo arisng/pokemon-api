@@ -33,12 +33,14 @@ const createPokemon = () => {
 
 /* GET pokemons listing. */
 router.get("/", (req, res, next) => {
-  const allowedFilter = ["name", "type", "page", "limit"];
+  const allowedFilter = ["name", "type", "search", "id"];
   try {
-    let { name, type, page, limit, ...filterQuery } = req.query;
+    let { page, limit, ...filterQuery } = req.query;
     page = parseInt(page) || 1;
     limit = parseInt(limit) || 10;
+
     const filterKeys = Object.keys(filterQuery);
+
     filterKeys.forEach((key) => {
       if (!allowedFilter.includes(key)) {
         const exception = new Error(`Query ${key} is not allowed`);
@@ -56,17 +58,19 @@ router.get("/", (req, res, next) => {
     const pokemons = db.data;
     //Filter data by title
     let result = pokemons;
-    if (name) {
-      const searchRegex = new RegExp(name, "i");
-      result = result.filter((pokemon) => searchRegex.test(pokemon.name));
-    }
 
+    /*
     if (type) {
       result = result.filter((pokemon) =>
         pokemon.types.some(
           (pokemonType) => pokemonType.toLowerCase() === type.toLowerCase()
         )
       );
+    }
+
+    if (search) {
+      const searchRegex = new RegExp(name, "i");
+      result = result.filter((pokemon) => searchRegex.test(pokemon.name));
     }
     // addition filter
     if (filterKeys.length) {
@@ -76,6 +80,27 @@ router.get("/", (req, res, next) => {
         );
       });
     }
+    */
+    if (filterKeys.length) {
+      if (filterQuery.type) {
+        const searchQuery = filterQuery.type.toLowerCase();
+        console.log("Line 87 searchQuery", searchQuery);
+        result = result.filter((pokemon) =>
+          pokemon.types.some(
+            (pokemonType) => pokemonType.toLowerCase() === searchQuery
+          )
+        );
+      }
+
+      if (filterQuery.search) {
+        const searchQuery = filterQuery.search.toLowerCase();
+        console.log(" Line  95 searchQuery", searchQuery);
+        result = result.filter(
+          (pokemon) => pokemon.name === searchQuery || pokemon.id == searchQuery
+        );
+      }
+    }
+
     //then select number of result by offset
     result = result.slice(offset, offset + limit);
 
