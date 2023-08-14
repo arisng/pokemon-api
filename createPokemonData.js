@@ -18,7 +18,7 @@ const createPokemonData = async () => {
       id: index + 1,
       name: e.Name,
 
-      type: !e.Type2 ? [e.Type1] : [e.Type1, e.Type2],
+      types: !e.Type2 ? [e.Type1] : [e.Type1, e.Type2],
       imageLink: `http://localhost:9000/images/${index + 1}.jpg`,
     };
   });
@@ -28,4 +28,5 @@ const createPokemonData = async () => {
 
   console.log(newData);
 };
+
 createPokemonData();
