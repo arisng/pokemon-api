@@ -9,24 +9,32 @@ const { faker } = require("@faker-js/faker");
 const createPokemon = () => {
   const min = 720;
   const max = 800;
-
-  const randomNumber = Math.floor(Math.random() * (max - min + 1)) + min;
+  // console.log("test createPok");
   const name = faker.person.firstName();
+  // console.log("test createPok with name: ", name);
   const typeLength = Math.floor(Math.random() * 4);
-  // Shuffle the 'types' array randomly
-  const shuffledTypes = pokemonAllTypes.sort(() => 0.5 - Math.random());
+  // console.log("test createPok with typeLength: ", typeLength);
+  const allTypes = pokemonAllTypes();
+  // console.log("test createPok with allTypes: ", allTypes);
+  // // Shuffle the 'types' array randomly
+  const shuffledTypes = allTypes.sort(() => 0.5 - Math.random());
+  // console.log("test createPok with shuffledTypes: ", shuffledTypes);
 
   // Extract a subarray with the desired length
   const types = shuffledTypes.slice(0, typeLength);
+  // console.log("test createPok with types: ", types);
   const randomId = Math.floor(Math.random() * DATA_SIZE) + 1;
   const imageLink = `http://localhost:9000/images/${randomId}.jpg`;
   const id = Math.floor(Math.random() * (max - min + 1)) + min;
+  // console.log("test createPok with id: ", id);
   const newPokemon = {
     id,
     name,
     types,
     imageLink,
   };
+
+  // console.log("create new: ", newPokemon);
   return newPokemon;
 };
 
@@ -138,59 +146,53 @@ router.post("/", (req, res, next) => {
   let db = fs.readFileSync("db.json", "utf-8");
   db = JSON.parse(db);
   const pokemons = db.data;
-  console.log("test post;");
-  const { name, types, imageLink } = req.body;
-  console.log("test post 2;");
+  // console.log("test post;");
+  // const { name, types, imageLink } = req.body;
+  // console.log("test post 2;");
 
-  // const newPokemon = createPokemon();
-  // const newPokemon = {
-  //   id: "750",
-  //   name: "pokemonA",
-  //   types: ["Water"],
-  //   imageLink: "http://localhost:9000/images/7.jpg",
-  // };
+  const newPok = createPokemon();
+  console.log("newPok: ", newPok);
+  const { id, name, types, imageLink } = newPok;
 
   try {
     if (!name) {
-      console.log("test post name;");
+      // console.log("test post name;");
       const exception = new Error(`Missing required data `);
       exception.statusCode = 404;
       throw exception;
     }
 
     if (types.length < 1 || types.length > 2) {
-      console.log("test post types;");
+      // console.log("test post types;");
       const exception = new Error(`Pokémon can only have one or two types. `);
       exception.statusCode = 404;
       throw exception;
     }
 
     if (pokemons.some((pokemon) => pokemon.name === name)) {
-      console.log("test post name;");
+      // console.log("test post name;");
       const exception = new Error(`The Pokémon already exists. `);
       exception.statusCode = 404;
       throw exception;
     }
 
-    // if (pokemons.some((pokemon) => pokemon.id === id)) {
-    //   const exception = new Error(`The Pokémon already exists. `);
-    //   exception.statusCode = 404;
-    //   throw exception;
-    // }
-    const min = 720;
-    const max = 800;
-    console.log("test post 2;");
+    if (pokemons.some((pokemon) => pokemon.id === id)) {
+      const exception = new Error(`The Pokémon already exists. `);
+      exception.statusCode = 404;
+      throw exception;
+    }
+    // const min = 720;
+    // const max = 800;
+    // console.log("test post 2;");
     const newPokemon = {
-      id: Math.floor(Math.random() * (max - min + 1)) + min,
+      id,
       name,
       types,
       imageLink,
     };
 
-    console.log("newPokemon: ", newPokemon);
-
     //Add new book to book JS object
-    pokemons.push(newPokemon);
+    pokemons.push(newPok);
     //Add new book to db JS object
     db.data = pokemons;
     //db JSobject to JSON string

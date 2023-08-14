@@ -14,6 +14,9 @@ const pokemonAllTypes = () => {
   });
 
   // console.log("pokemontype; ", pokemonTypes);
+
+  // console.log("size pokemontype; ", pokemonTypes.length);
+  return pokemonTypes;
 };
 
-module.exports = pokemonAllTypes();
+module.exports = pokemonAllTypes;
