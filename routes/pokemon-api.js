@@ -97,11 +97,9 @@ router.get("/", (req, res, next) => {
 });
 
 /* GET pokemon by Id. */
-router.get("/:pokemonID", (req, res, next) => {
+router.get("/:pokemonId", (req, res, next) => {
   try {
-    const { pokemonID } = req.params;
-
-    let pokemonId = parseInt(pokemonID);
+    const { pokemonId } = req.params;
 
     //Read data from db.json then parse to JSobject
     let db = fs.readFileSync("db.json", "utf-8");
@@ -133,9 +131,11 @@ router.get("/:pokemonID", (req, res, next) => {
       nextId = targetIndex + 1;
     }
 
-    result.push(pokemons[targetIndex]);
-    result.push(pokemons[prevId]);
-    result.push(pokemons[nextId]);
+    const pokemon = pokemons[targetIndex];
+    const nextPokemon = pokemons[nextId];
+    const previousPokemon = pokemons[prevId];
+    result = { data: [{ pokemon, nextPokemon, previousPokemon }] };
+    console.log("result: ", result);
     //put send response
     res.status(200).send(result);
   } catch (error) {
@@ -196,10 +196,10 @@ router.post("/", (req, res, next) => {
 });
 
 /* DELETE new Pokemon. */
-router.delete("/:pokemonID", (req, res, next) => {
+router.delete("/:pokemonId", (req, res, next) => {
   try {
-    const { pokemonID } = req.params;
-    let pokemonId = parseInt(pokemonID);
+    const { pokemonId } = req.params;
+
     //Read data from db.json then parse to JSobject
     let db = fs.readFileSync("db.json", "utf-8");
     db = JSON.parse(db);
@@ -213,7 +213,7 @@ router.delete("/:pokemonID", (req, res, next) => {
       exception.statusCode = 404;
       throw exception;
     }
-    db.data = pokemons.filter((pokemon) => pokemon.id != pokemonId);
+    db.data = pokemons.filter((pokemon) => pokemon.id !== pokemonId);
     db = JSON.stringify(db);
     fs.writeFileSync("db.json", db);
     res.status(200).send({});
@@ -226,8 +226,8 @@ router.delete("/:pokemonID", (req, res, next) => {
 router.put("/:pokemonID", (req, res, next) => {
   try {
     // verify the id
-    const { pokemonID } = req.params;
-    let pokemonId = parseInt(pokemonID);
+    const { pokemonId } = req.params;
+    // let pokemonId = parseInt(pokemonId);
 
     let db = fs.readFileSync("db.json", "utf-8");
     db = JSON.parse(db);

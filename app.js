@@ -66,6 +66,4 @@ app.use((err, req, res, next) => {
 //   console.log("Server is running on port 9001");
 // });
 
-// app.listen(9000);
-
 module.exports = app;

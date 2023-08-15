@@ -15,7 +15,7 @@ const createPokemonData = async () => {
 
   newData = newData.map((e, index) => {
     return {
-      id: index + 1,
+      id: (index + 1).toString(),
       name: e.Name,
 
       types: !e.Type2 ? [e.Type1] : [e.Type1, e.Type2],
