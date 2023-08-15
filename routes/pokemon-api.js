@@ -6,31 +6,6 @@ const DATA_SIZE = require("../config");
 const pokemonAllTypes = require("../getPokemonTypes");
 const { faker } = require("@faker-js/faker");
 
-const createPokemon = () => {
-  const min = 720;
-  const max = 800;
-
-  const name = faker.person.firstName();
-  const typeLength = Math.floor(Math.random() * 4);
-  const allTypes = pokemonAllTypes();
-  // Shuffle the 'types' array randomly
-  const shuffledTypes = allTypes.sort(() => 0.5 - Math.random());
-  // Extract a subarray with the desired length
-  const types = shuffledTypes.slice(0, typeLength);
-  const randomId = Math.floor(Math.random() * DATA_SIZE) + 1;
-  const imageLink = `http://localhost:9000/images/${randomId}.jpg`;
-  const id = Math.floor(Math.random() * (max - min + 1)) + min;
-  const newPokemon = {
-    id,
-    name,
-    types,
-    imageLink,
-  };
-
-  // console.log("create new: ", newPokemon);
-  return newPokemon;
-};
-
 /* GET pokemons listing. */
 router.get("/", (req, res, next) => {
   const allowedFilter = ["name", "type", "search", "id"];
@@ -55,17 +30,12 @@ router.get("/", (req, res, next) => {
     //Read data from db.json then parse to JSonbject
     let db = fs.readFileSync("db.json", "utf-8");
     db = JSON.parse(db);
-    // const pokemons = db.data;
-    const { data } = db;
 
-    // const { pokemons } = db;
-    //Filter data by title
-    // let result = pokemons;
+    const { data } = db;
 
     if (filterKeys.length) {
       if (filterQuery.type) {
         const searchQuery = filterQuery.type.toLowerCase();
-        console.log("Line 87 searchQuery", searchQuery);
         result = data.filter((pokemon) =>
           pokemon.types.some(
             (pokemonType) => pokemonType.toLowerCase() === searchQuery
@@ -75,9 +45,10 @@ router.get("/", (req, res, next) => {
 
       if (filterQuery.search) {
         const searchQuery = filterQuery.search.toLowerCase();
-        console.log(" Line  95 searchQuery", searchQuery);
         result = data.filter(
-          (pokemon) => pokemon.name === searchQuery || pokemon.id == searchQuery
+          (pokemon) =>
+            pokemon.name.toLowerCase() === searchQuery ||
+            pokemon.id == searchQuery
         );
       }
     } else {
@@ -137,10 +108,6 @@ router.get("/:pokemonId", (req, res, next) => {
 
     const newresult = { nextPokemon, pokemon, previousPokemon };
     const newresultJSON = JSON.stringify(newresult);
-
-    // result = { data: pokemon };
-    // console.log("result: ", newresultJSON);
-    //put send response
     res.status(200).send(newresultJSON);
   } catch (error) {
     next(error);
@@ -154,12 +121,10 @@ router.post("/", (req, res, next) => {
   db = JSON.parse(db);
   const pokemons = db.data;
 
-  const newPok = createPokemon();
-  console.log("newPok: ", newPok);
-  const { id, name, types, imageLink } = newPok;
+  const { id, name, types, url } = req.body;
 
   try {
-    if (!name) {
+    if (!name || !id) {
       const exception = new Error(`Missing required data `);
       exception.statusCode = 404;
       throw exception;
@@ -182,9 +147,33 @@ router.post("/", (req, res, next) => {
       exception.statusCode = 404;
       throw exception;
     }
+    const allTypes = pokemonAllTypes();
+
+    if (types[1]) {
+      if (types.some((type) => !allTypes.includes(type))) {
+        const exception = new Error(`Pokémon's type is invalid.`);
+        exception.statusCode = 404;
+        throw exception;
+      }
+    } else {
+      if (!allTypes.includes(types[0])) {
+        const exception = new Error(`Pokémon's type is invalid.`);
+        exception.statusCode = 404;
+        throw exception;
+      }
+    }
+
+    const randomImageIndex = Math.floor(Math.random() * DATA_SIZE) + 1;
+    const replacedUrl = `http://localhost:9000/images/${randomImageIndex}.jpg`;
+    const newPokemon = {
+      id,
+      name,
+      types: !types[1] ? [types[0]] : [types[0], types[1]],
+      url: url || replacedUrl,
+    };
 
     //Add new book to book JS object
-    pokemons.push(newPok);
+    pokemons.push(newPokemon);
     //Add new book to db JS object
     db.data = pokemons;
     //db JSobject to JSON string
@@ -193,7 +182,7 @@ router.post("/", (req, res, next) => {
     fs.writeFileSync("db.json", db);
 
     //post send response
-    res.status(200).send(newPok);
+    res.status(200).send(newPokemon);
   } catch (error) {
     next(error);
   }
@@ -231,7 +220,6 @@ router.put("/:pokemonID", (req, res, next) => {
   try {
     // verify the id
     const { pokemonId } = req.params;
-    // let pokemonId = parseInt(pokemonId);
 
     let db = fs.readFileSync("db.json", "utf-8");
     db = JSON.parse(db);

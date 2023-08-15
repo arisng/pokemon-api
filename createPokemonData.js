@@ -2,44 +2,15 @@ const fs = require("fs");
 const csv = require("csvtojson");
 const DATA_SIZE = require("./config");
 
-/*
-const createPokemonData = async () => {
-  let newData = await csv().fromFile("pokemon.csv");
-  let data;
-  try {
-    data = JSON.parse(fs.readFileSync("db.json"));
-  } catch (err) {
-    data = { data: [] };
-  }
-
-  newData = Array.from(newData).slice(0, DATA_SIZE);
-
-  newData = newData.map((e, index) => {
-    return {
-      id: (index + 1).toString(),
-      name: e.Name,
-      types: !e.Type2 ? [e.Type1] : [e.Type1, e.Type2],
-      url: `http://localhost:9000/images/${index + 1}.jpg`,
-    };
-  });
-
-  data = { ...data, data: newData };
-  fs.writeFileSync("db.json", JSON.stringify(data));
-
-  console.log(newData);
-};
-*/
-
 const createPokemonData = async () => {
   let newData = await csv().fromFile("pokedex.csv");
+
   let data;
   try {
     data = JSON.parse(fs.readFileSync("db.json"));
   } catch (err) {
     data = { data: [] };
   }
-
-  // newData = Array.from(newData).slice(0, DATA_SIZE);
 
   newData = newData.map((e) => {
     return {
@@ -66,9 +37,26 @@ const createPokemonData = async () => {
   newData = uniqueData.slice(0, DATA_SIZE);
 
   data = { ...data, data: newData };
-  fs.writeFileSync("db.json", JSON.stringify(data));
 
-  console.log(newData);
+  // fs.writeFileSync("db.json", JSON.stringify(data));
+
+  let pokDescription = await csv().fromFile("PokemonUniteData.csv");
+
+  const dbArray = data.data;
+  dbArray.forEach((obj) => {
+    const objName = obj.name.toLowerCase();
+    const matchingPoke = pokDescription.find(
+      (poke) => poke.Name?.toLowerCase() == objName
+    );
+    if (matchingPoke) {
+      obj.description = matchingPoke.Description;
+    }
+  });
+
+  data.data = dbArray;
+  // Write the updated dbData to db.json
+  fs.writeFileSync("db.json", JSON.stringify(data, null, 2), "utf-8");
+  // console.log(dbArray);
 };
 
 createPokemonData();

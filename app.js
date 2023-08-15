@@ -50,20 +50,4 @@ app.use((err, req, res, next) => {
   res.status(err.statusCode).send(err.message);
 });
 
-// const corsOptions = {
-//   origin: "http://localhost:3000",
-//   credentials: true, //access-control-allow-credentials:true
-//   optionSuccessStatus: 200,
-// };
-
-// app.get("/pokemons", function (req, res, next) {
-//   res.json({ msg: "This is CORS-enabled for all origins!" });
-// });
-
-// Rest of your server configuration and routes
-
-// app.listen(9001, () => {
-//   console.log("Server is running on port 9001");
-// });
-
 module.exports = app;

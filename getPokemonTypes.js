@@ -7,15 +7,13 @@ const pokemonAllTypes = () => {
   const pokemons = db.data;
   pokemons.forEach((pokemon) => {
     pokemon.types.forEach((type) => {
-      if (!pokemonTypes.includes(type)) {
-        pokemonTypes.push(type);
+      const lowerCaseType = type.toLowerCase();
+      if (!pokemonTypes.includes(lowerCaseType)) {
+        pokemonTypes.push(lowerCaseType);
       }
     });
   });
 
-  // console.log("pokemontype; ", pokemonTypes);
-
-  // console.log("size pokemontype; ", pokemonTypes.length);
   return pokemonTypes;
 };
 
