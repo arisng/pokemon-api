@@ -134,7 +134,9 @@ router.get("/:pokemonId", (req, res, next) => {
     const pokemon = pokemons[targetIndex];
     const nextPokemon = pokemons[nextId];
     const previousPokemon = pokemons[prevId];
-    result = { data: [{ pokemon, nextPokemon, previousPokemon }] };
+
+    result = { data: [pokemon, nextPokemon, previousPokemon] };
+    // result = { data: pokemon };
     console.log("result: ", result);
     //put send response
     res.status(200).send(result);

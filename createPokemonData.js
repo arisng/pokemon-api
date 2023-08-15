@@ -19,7 +19,7 @@ const createPokemonData = async () => {
       name: e.Name,
 
       types: !e.Type2 ? [e.Type1] : [e.Type1, e.Type2],
-      imageLink: `http://localhost:9000/images/${index + 1}.jpg`,
+      url: `http://localhost:9000/images/${index + 1}.jpg`,
     };
   });
 
