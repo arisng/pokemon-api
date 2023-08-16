@@ -6,6 +6,7 @@ const DATA_SIZE = require("../config");
 const pokemonAllTypes = require("../getPokemonTypes");
 const { faker } = require("@faker-js/faker");
 const BASE_URL = "https://pokemon-api2.onrender.com";
+// const BASE_URL = "http://localhost:9000";
 
 /* GET pokemons listing. */
 router.get("/", (req, res, next) => {
@@ -165,7 +166,7 @@ router.post("/", (req, res, next) => {
       }
     }
 
-    const randomImageIndex = Math.floor(Math.random() * DATA_SIZE) + 1;
+    const randomImageIndex = Math.floor(Math.random() * (DATA_SIZE - 1)) + 1;
     const replacedUrl = `${BASE_URL}/images/${randomImageIndex}.jpg`;
     const newPokemon = {
       id,

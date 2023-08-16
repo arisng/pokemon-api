@@ -2,6 +2,7 @@ const fs = require("fs");
 const csv = require("csvtojson");
 const DATA_SIZE = require("./config");
 const BASE_URL = "https://pokemon-api2.onrender.com";
+// const BASE_URL = "http://localhost:9000";
 
 const createPokemonData = async () => {
   let newData = await csv().fromFile("pokedex.csv");
