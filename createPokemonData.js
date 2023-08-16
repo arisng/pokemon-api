@@ -1,6 +1,7 @@
 const fs = require("fs");
 const csv = require("csvtojson");
 const DATA_SIZE = require("./config");
+const BASE_URL = " https://pokemon-api2.onrender.com";
 
 const createPokemonData = async () => {
   let newData = await csv().fromFile("pokedex.csv");
@@ -20,7 +21,7 @@ const createPokemonData = async () => {
       height: e.height_m,
       weight: e.weight_kg,
       abilities: !e.ability_2 ? [e.ability_1] : [e.ability_1, e.ability_2],
-      url: `http://localhost:9000/images/${e.pokedex_number}.jpg`,
+      url: `${BASE_URL}/images/${e.pokedex_number}.jpg`,
     };
   });
 
