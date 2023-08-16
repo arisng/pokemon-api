@@ -5,6 +5,7 @@ const router = express.Router();
 const DATA_SIZE = require("../config");
 const pokemonAllTypes = require("../getPokemonTypes");
 const { faker } = require("@faker-js/faker");
+const BASE_URL = "https://pokemon-api2.onrender.com";
 
 /* GET pokemons listing. */
 router.get("/", (req, res, next) => {
@@ -45,11 +46,12 @@ router.get("/", (req, res, next) => {
 
       if (filterQuery.search) {
         const searchQuery = filterQuery.search.toLowerCase();
-        result = data.filter(
-          (pokemon) =>
-            pokemon.name.toLowerCase() === searchQuery ||
-            pokemon.id == searchQuery
-        );
+        result = data.filter((pokemon) => {
+          const pokName = pokemon.name.toLowerCase();
+          return (
+            pokName.includes(searchQuery) || pokemon.id.includes(searchQuery)
+          );
+        });
       }
     } else {
       result = data;
@@ -164,7 +166,7 @@ router.post("/", (req, res, next) => {
     }
 
     const randomImageIndex = Math.floor(Math.random() * DATA_SIZE) + 1;
-    const replacedUrl = `http://localhost:9000/images/${randomImageIndex}.jpg`;
+    const replacedUrl = `${BASE_URL}/images/${randomImageIndex}.jpg`;
     const newPokemon = {
       id,
       name,
