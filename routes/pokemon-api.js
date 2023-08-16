@@ -175,12 +175,14 @@ router.post("/", (req, res, next) => {
       url: url || replacedUrl,
     };
 
+    // check
     //Add new book to book JS object
     // pokemons.push(newPokemon);
     db.data.push(newPokemon);
     //Add new book to db JS object
     // db.data = pokemons;
     //db JSobject to JSON string
+
     db = JSON.stringify(db);
     //write and save to db.json
     fs.writeFileSync("db.json", db);
